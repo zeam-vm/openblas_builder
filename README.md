@@ -1,4 +1,4 @@
-# OpenblasBuilder
+# OpenBLASBuilder
 
 **TODO: Add description**
 

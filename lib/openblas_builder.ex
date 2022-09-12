@@ -1,6 +1,6 @@
 defmodule OpenBLASBuilder do
   @moduledoc """
-  Documentation for `OpenblasBuilder`.
+  Documentation for `OpenBLASBuilder`.
   """
 
   @doc """
