@@ -1,6 +1,6 @@
 # OpenBLASBuilder
 
-**TODO: Add description**
+A builder of OpenBLAS.
 
 ## Installation
 
