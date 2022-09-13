@@ -26,6 +26,10 @@ defmodule Mix.Tasks.OpenblasBuilder.Info do
     Mix.shell().info(OpenBLASBuilder.include_path())
   end
 
+  def run(["including_option"]) do
+    Mix.shell().info(OpenBLASBuilder.including_option())
+  end
+
   def run(_args) do
     Mix.shell().error("""
     Usage:
@@ -34,6 +38,7 @@ defmodule Mix.Tasks.OpenblasBuilder.Info do
     mix openblas_builder.info build_archive_dir\
     mix openblas_builder.info src_path\
     mix openblas_builder.info include_path\
+    mix openblas_builder.info including_option\
     """)
   end
 end
