@@ -7,6 +7,21 @@ defmodule OpenBLASBuilder do
   @version "0.3.21"
 
   @doc """
+  Gets information of CPU and OS.
+  """
+  def cpu_and_os() do
+    :erlang.system_info(:system_architecture)
+    |> List.to_string()
+    |> String.split("-")
+    |> case do
+      ["arm" <> _, _vendor, "darwin" <> _ | _] -> {"aarch64", "darwin"}
+      [cpu, _vendor, "darwin" <> _ | _] -> {cpu, "darwin"}
+      [cpu, _vendor, os | _] -> {cpu, os}
+      ["win32"] -> {"x86_64", "windows"}
+    end
+  end
+
+  @doc """
   Returns release_tag.
   """
   def release_tag() do
