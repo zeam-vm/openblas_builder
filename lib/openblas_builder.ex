@@ -30,7 +30,8 @@ defmodule OpenBLASBuilder do
     Path.join([base_dir, @version, "cache" | parts])
   end
 
-  defp archive_filename_with_version() do
+  @doc false
+  def archive_filename_with_version() do
     "OpenBLAS-#{@version}.tar.gz"
   end
 
@@ -39,8 +40,19 @@ defmodule OpenBLASBuilder do
     cache_path(["download", filename])
   end
 
-  defp release_tag() do
+  defp archive_path_for_build() do
+    filename = archive_filename_with_version()
+    cache_path(["build", filename])
+  end
+
+  @doc false
+  def release_tag() do
     "v#{@version}"
+  end
+
+  @doc false
+  def build_archive_dir() do
+    Path.dirname(archive_path_for_build())
   end
 
   defp list_release_files() do
