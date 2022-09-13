@@ -13,6 +13,11 @@ defmodule OpenBLASBuilder do
       true ->
         # The archive should have already been built by this point
         archive_path_for_build()
+
+      url = openblas_archive_url() ->
+        path = archive_path_for_external_download(url)
+        unless File.exists?(path), do: download_external!(url, path)
+        path
     end
   end
 
@@ -57,6 +62,15 @@ defmodule OpenBLASBuilder do
   def cache_path(parts) do
     base_dir = openblas_cache_dir()
     Path.join([base_dir, @version, "cache" | parts])
+  end
+
+  @doc """
+  Download external.
+  """
+  def download_external!(url, archive_path) do
+    assert_network_tool!()
+    Logger.info("Downloading OpenBLAS archive from #{url}")
+    download_archive!(url, archive_path)
   end
 
   @doc """
