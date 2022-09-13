@@ -6,6 +6,14 @@ defmodule OpenBLASBuilder do
   @github_repo "xianyi/OpenBLAS"
   @version "0.3.21"
 
+
+  @doc """
+  Gets the file name of the archive with the target.
+  """
+  def archive_filename_with_target() do
+    "openblas-#{target()}.tar.gz"
+  end
+
   @doc """
   Gets target.
   """
