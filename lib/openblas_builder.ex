@@ -3,6 +3,15 @@ defmodule OpenBLASBuilder do
   Documentation for `OpenBLASBuilder`.
   """
 
+  @version "0.3.21"
+
+  @doc """
+  Returns release_tag.
+  """
+  def release_tag() do
+    "v#{@version}"
+  end
+
   @doc """
   Downloads the file at `url` to the path of `dest`.
   """
