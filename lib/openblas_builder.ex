@@ -71,7 +71,12 @@ defmodule OpenBLASBuilder do
     end
   end
 
-  def filter_match?(stream, string_list) do
+  @doc """
+  Filters `stream` by matching `string_list`,
+  i.e. returns only those elements which matches `string_list`,
+  and returns a stream with the given captures as a map.
+  """
+  def filter_matched_and_named_captures(stream, string_list) do
     r =
       string_list
       |> Enum.map(& "(?<#{&1}>^.*#{&1}.*$)")
