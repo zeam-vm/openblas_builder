@@ -17,6 +17,15 @@ defmodule OpenBLASBuilder do
     end
   end
 
+  @doc false
+  def make_env() do
+    %{
+      "ROOT_DIR" => Path.expand("..", __DIR__),
+      "BUILD_ARCHIVE" => archive_path_for_build(),
+      "BUILD_ARCHIVE_DIR" => build_archive_dir()
+    }
+  end
+
   defp openblas_cache_dir() do
     if dir = System.get_env("OPENBLAS_CACHE_DIR") do
       Path.expand(dir)
