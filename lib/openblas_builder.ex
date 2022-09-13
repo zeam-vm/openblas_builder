@@ -50,6 +50,19 @@ defmodule OpenBLASBuilder do
     end
   end
 
+  def filter_match?(stream, string_list) do
+    r =
+      string_list
+      |> Enum.map(& "(?<#{&1}>^.*#{&1}.*$)")
+      |> Enum.join("|")
+      |> Regex.compile!()
+
+    stream
+    |> Stream.map(&Regex.named_captures(r, &1))
+    |> Stream.reject(&is_nil/1)
+    |> Stream.map(&Map.reject(&1, fn {_, v} -> v == "" end))
+  end
+
   @doc false
   def make_env() do
     %{
