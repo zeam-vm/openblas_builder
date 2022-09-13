@@ -11,7 +11,6 @@ defmodule OpenblasBuilder.MixProject do
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      compilers: Mix.compilers() ++ [:elixir_make],
       docs: [
         main: "readme",
         source_url: @source_url,
@@ -25,7 +24,6 @@ defmodule OpenblasBuilder.MixProject do
         },
         files: [
           "lib",
-          "Makefile",
           "mix.exs",
           "README.md",
           "LICENSE",
@@ -47,7 +45,6 @@ defmodule OpenblasBuilder.MixProject do
     [
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
-      {:elixir_make, "~> 0.6", runtime: false},
       {:ex_doc, "~> 0.28", only: :dev, runtime: false}
     ]
   end
