@@ -18,6 +18,11 @@ defmodule OpenBLASBuilder do
         path = archive_path_for_external_download(url)
         unless File.exists?(path), do: download_external!(url, path)
         path
+
+      true ->
+        path = archive_path_for_matching_download()
+        unless File.exists?(path), do: download_matching!(path)
+        path
     end
   end
 
@@ -152,19 +157,52 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Downloads matching.
+  """
+  def download_matching!(archive_path) do
+    assert_network_tool!()
+
+    expected_filename = Path.basename(archive_path)
+
+    filenames =
+      case list_release_files() do
+        {:ok, filenames} ->
+          filenames
+
+        :error ->
+          raise "could not find #{release_tag()} release under https://github.com/#{@github_repo}/releases"
+      end
+
+    unless expected_filename in filenames do
+      listing = filenames |> Enum.map(&["    * ", &1, "\n"]) |> IO.iodata_to_binary()
+
+      raise "none of the precompiled archives matches your target\n" <>
+              "  Expected:\n" <>
+              "    * #{expected_filename}\n" <>
+              "  Found:\n" <>
+              listing <>
+              "\nYou can compile OpenBLAS locally by setting an environment variable: OPENBLAS_BUILD=true"
+    end
+
+    Logger.info("Found a matching archive (#{expected_filename}), going to download it")
+    url = release_file_url(expected_filename)
+    download_archive!(url, archive_path)
+  end
+
+  @doc """
   Downloads the file at `url` to the path of `dest`.
   """
   def download(url, dest) do
-     command =
+    command =
       case network_tool() do
         :curl -> "curl --fail -L #{url} -o #{dest}"
         :wget -> "wget -O #{dest} #{url}"
       end
 
-      case System.shell(command) do
-        {_, 0} -> :ok
-        _ -> :error
-      end
+    case System.shell(command) do
+      {_, 0} -> :ok
+      _ -> :error
+    end
   end
 
   @doc """
@@ -177,10 +215,10 @@ defmodule OpenBLASBuilder do
         :wget -> "wget -q -O - #{url}"
       end
 
-      case System.shell(command) do
-        {body, 0} -> {:ok, body}
-        _ -> :error
-      end
+    case System.shell(command) do
+      {body, 0} -> {:ok, body}
+      _ -> :error
+    end
   end
 
   @doc """
