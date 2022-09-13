@@ -10,17 +10,17 @@ defmodule OpenBLASBuilder do
 
   def archive_path!() do
     cond do
-      true ->
+      # true ->
         # The archive should have already been built by this point
-        archive_path_for_build()
+      #  archive_path_for_build()
 
-      url = openblas_archive_url() ->
-        path = archive_path_for_external_download(url)
-        unless File.exists?(path), do: download_external!(url, path)
-        path
+      #url = openblas_archive_url() ->
+      #  path = archive_path_for_external_download(url)
+      #  unless File.exists?(path), do: download_external!(url, path)
+      #  path
 
       true ->
-        path = archive_path_for_matching_download()
+        path = "OpenBLAS-#{@version}.tar.gz"
         unless File.exists?(path), do: download_matching!(path)
         path
     end
