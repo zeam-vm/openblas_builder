@@ -30,6 +30,15 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Gets the path of the archive for external downloading.
+  """
+  def archive_path_for_external_download(url) do
+    hash = url |> :erlang.md5() |> Base.encode32(case: :lower, padding: false)
+    filename = "openblas-#{hash}.tar.gz"
+    cache_path(["external", filename])
+  end
+
+  @doc """
   Get the cache directory of OpenBLAS.
   """
   def openblas_cache_dir() do
