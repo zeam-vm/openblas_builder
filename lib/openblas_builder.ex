@@ -81,6 +81,14 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Gets the path for matching download()
+  """
+  def archive_path_for_matching_download() do
+    filename = archive_filename_with_target()
+    cache_path(["download", filename])
+  end
+
+  @doc """
   Gets target.
   """
   def target() do
