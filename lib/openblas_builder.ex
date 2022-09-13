@@ -6,6 +6,14 @@ defmodule OpenBLASBuilder do
   @github_repo "xianyi/OpenBLAS"
   @version "0.3.21"
 
+  def archive_path!() do
+    cond do
+      true ->
+        # The archive should have already been built by this point
+        archive_path_for_build()
+    end
+  end
+
   @doc """
   Gets the path of the archive for building.
   """
