@@ -96,6 +96,12 @@ defmodule OpenBLASBuilder do
     path_extracted_archive()
   end
 
+  @doc """
+  Returns incuding option for CFLAGS.
+  """
+  def including_option() do
+    "-I#{include_path()}"
+  end
 
   @doc false
   def make_env() do
