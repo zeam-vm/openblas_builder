@@ -66,6 +66,15 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Asserts existence of the network tool.
+  """
+  def assert_network_tool!() do
+    unless network_tool() do
+      raise "expected either curl or wget to be available in your system, but neither was found"
+    end
+  end
+
+  @doc """
   Returns `:curl` or `:wget` if found in the PATH.
 
   Return `nil` if not found.
