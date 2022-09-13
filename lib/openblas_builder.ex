@@ -35,18 +35,39 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Returns the path of the extracted archive.
+  """
+  def path_extracted_archive() do
+    Path.join(src_path(), archive_basename_with_version())
+  end
+
+  @doc """
+  Returns the path of the cached results of `make -n` on the `src_path`.
+  """
+  def path_cached_maken() do
+    Path.join(src_path(), "cached_maken.txt")
+  end
+
+  @doc """
   Returns the result of `make -n` on the `src_path`.
   """
   def maken!() do
-    unless executable_exists?("make") do
-      raise "make was not found"
-    end
+    if File.exists?(path_cached_maken()) do
+      File.stream!(path_cached_maken())
+    else
+      unless executable_exists?("make") do
+        raise "make was not found"
+      end
 
-    path = extract_archive!()
-    command = "make -n 2>/dev/null"
+      command = "make -n 2>/dev/null"
 
-    case System.shell(command, cd: path) do
-      {result, _} -> result |> String.split("\n") |> Stream.filter(& String.match?(&1, ~r|^cc|))
+      result =
+        case System.shell(command, cd: path_extracted_archive()) do
+          {result, _} -> result |> String.split("\n") |> Stream.filter(& String.match?(&1, ~r|^cc|))
+        end
+
+      File.write!(path_cached_maken(), Enum.join(result, "\n"))
+      result
     end
   end
 
