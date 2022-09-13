@@ -18,6 +18,19 @@ defmodule OpenBLASBuilder do
   end
 
   @doc false
+  def extract_archive!() do
+    src = src_path()
+    File.mkdir_p!(src)
+    archive = archive_path!()
+    command = "tar xfz #{archive}"
+
+    case System.shell(command, cd: src) do
+      {_result, 0} -> Path.join(src, archive_basename_with_version())
+      _ -> raise "Fail to tar xvfz #{archive}"
+    end
+  end
+
+  @doc false
   def make_env() do
     %{
       "ROOT_DIR" => Path.expand("..", __DIR__),
@@ -34,14 +47,22 @@ defmodule OpenBLASBuilder do
     end
   end
 
+  defp src_path() do
+    Application.app_dir(:openblas_builder, "src")
+  end
+
   defp cache_path(parts) do
     base_dir = openblas_cache_dir()
     Path.join([base_dir, @version, "cache" | parts])
   end
 
+  defp archive_basename_with_version() do
+    "OpenBLAS-#{@version}"
+  end
+
   @doc false
   def archive_filename_with_version() do
-    "OpenBLAS-#{@version}.tar.gz"
+    "#{archive_basename_with_version()}.tar.gz"
   end
 
   defp archive_path_for_matching_download() do
