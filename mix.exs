@@ -2,6 +2,7 @@ defmodule OpenblasBuilder.MixProject do
   use Mix.Project
 
   @version "0.1.0-dev"
+  @source_url "https://github.com/zeam-vm/openblas_builder"
 
   def project do
     [
@@ -13,9 +14,23 @@ defmodule OpenblasBuilder.MixProject do
       compilers: Mix.compilers() ++ [:elixir_make],
       docs: [
         main: "readme",
-        source_url: "https://github.com/zeam-vm/openblas_builder",
+        source_url: @source_url,
         source_ref: "v#{@version}",
         extras: ["README.md"]
+      ],
+      package: [
+        licenses: ["Apache-2.0"],
+        links: %{
+          "GitHub" => @source_url
+        },
+        files: [
+          "lib",
+          "Makefile",
+          "mix.exs",
+          "README.md",
+          "LICENSE",
+          "CHANGELOG.md"
+        ]
       ]
     ]
   end
