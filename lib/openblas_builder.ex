@@ -19,6 +19,10 @@ defmodule OpenBLASBuilder do
 
   @doc false
   def extract_archive!() do
+    unless executable_exists?("tar") do
+      raise "tar was not found"
+    end
+
     src = src_path()
     File.mkdir_p!(src)
     archive = archive_path!()
@@ -26,7 +30,23 @@ defmodule OpenBLASBuilder do
 
     case System.shell(command, cd: src) do
       {_result, 0} -> Path.join(src, archive_basename_with_version())
-      _ -> raise "Fail to tar xvfz #{archive}"
+      _ -> raise "Fail to tar xfz #{archive}"
+    end
+  end
+
+  @doc """
+  Returns the result of `make -n` on the `src_path`.
+  """
+  def maken!() do
+    unless executable_exists?("make") do
+      raise "make was not found"
+    end
+
+    path = extract_archive!()
+    command = "make -n 2>/dev/null"
+
+    case System.shell(command, cd: path) do
+      {result, _} -> result |> String.split("\n") |> Enum.filter(& String.match?(&1, ~r|^cc|))
     end
   end
 
@@ -47,7 +67,10 @@ defmodule OpenBLASBuilder do
     end
   end
 
-  defp src_path() do
+  @doc """
+  Returns the source path `src_path`.
+  """
+  def src_path() do
     Application.app_dir(:openblas_builder, "src")
   end
 
