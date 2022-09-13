@@ -3,6 +3,7 @@ defmodule OpenBLASBuilder do
   Documentation for `OpenBLASBuilder`.
   """
 
+  @github_repo "xianyi/OpenBLAS"
   @version "0.3.21"
 
   @doc """
@@ -10,6 +11,19 @@ defmodule OpenBLASBuilder do
   """
   def release_tag() do
     "v#{@version}"
+  end
+
+  @doc """
+  Lists release files.
+  """
+  def list_release_files() do
+    url = "https://api.github.com/repos/#{@github_repo}/releases/tags/#{release_tag()}"
+
+    with {:ok, body} <- get(url) do
+      # We don't have a JSON library available here, so we do
+      # a simple matching
+      {:ok, Regex.scan(~r/"name":\s+"(.*\.tar\.gz)"/, body) |> Enum.map(&Enum.at(&1, 1))}
+    end
   end
 
   @doc """
