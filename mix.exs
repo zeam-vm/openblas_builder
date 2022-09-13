@@ -7,7 +7,8 @@ defmodule OpenblasBuilder.MixProject do
       version: "0.1.0-dev",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      compilers: Mix.compilers() ++ [:elixir_make]
     ]
   end
 
