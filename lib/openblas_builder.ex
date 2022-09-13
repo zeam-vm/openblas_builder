@@ -4,6 +4,22 @@ defmodule OpenBLASBuilder do
   """
 
   @doc """
+  Downloads the file at `url` to the path of `dest`.
+  """
+  def download(url, dest) do
+     command =
+      case network_tool() do
+        :curl -> "curl --fail -L #{url} -o #{dest}"
+        :wget -> "wget -O #{dest} #{url}"
+      end
+
+      case System.shell(command) do
+        {_, 0} -> :ok
+        _ -> :error
+      end
+  end
+
+  @doc """
   Returns `:curl` or `:wget` if found in the PATH.
 
   Return `nil` if not found.
