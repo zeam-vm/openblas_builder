@@ -89,6 +89,14 @@ defmodule OpenBLASBuilder do
     |> Stream.map(&Map.reject(&1, fn {_, v} -> v == "" end))
   end
 
+  @doc """
+  Returns the path to include the header of OpenBLAS.
+  """
+  def include_path() do
+    path_extracted_archive()
+  end
+
+
   @doc false
   def make_env() do
     %{
