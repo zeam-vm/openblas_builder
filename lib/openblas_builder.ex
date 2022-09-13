@@ -20,7 +20,7 @@ defmodule OpenBLASBuilder do
       #  path
 
       true ->
-        path = "OpenBLAS-#{@version}.tar.gz"
+        path = archive_path_for_matching_download()
         unless File.exists?(path), do: download_matching!(path)
         path
     end
@@ -86,10 +86,17 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Gets the file name of the archive with the version.
+  """
+  def archive_filename_with_version() do
+    "OpenBLAS-#{@version}.tar.gz"
+  end
+
+  @doc """
   Gets the path for matching download()
   """
   def archive_path_for_matching_download() do
-    filename = archive_filename_with_target()
+    filename = archive_filename_with_version()
     cache_path(["download", filename])
   end
 
