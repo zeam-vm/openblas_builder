@@ -27,6 +27,13 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Get URL of the release file.
+  """
+  def release_file_url(filename) do
+    "https://github.com/#{@github_repo}/releases/download/#(release_tag()}/#{filename}"
+  end
+
+  @doc """
   Downloads the file at `url` to the path of `dest`.
   """
   def download(url, dest) do
