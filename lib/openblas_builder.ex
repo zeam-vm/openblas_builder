@@ -6,6 +6,13 @@ defmodule OpenBLASBuilder do
   @github_repo "xianyi/OpenBLAS"
   @version "0.3.21"
 
+  @doc """
+  Gets the path of the archive for building.
+  """
+  def archive_path_for_build() do
+    filename = archive_filename_with_target()
+    cache_path(["build", filename])
+  end
 
   @doc """
   Get the cache directory of OpenBLAS.
