@@ -46,7 +46,7 @@ defmodule OpenBLASBuilder do
     command = "make -n 2>/dev/null"
 
     case System.shell(command, cd: path) do
-      {result, _} -> result |> String.split("\n") |> Enum.filter(& String.match?(&1, ~r|^cc|))
+      {result, _} -> result |> String.split("\n") |> Stream.filter(& String.match?(&1, ~r|^cc|))
     end
   end
 
