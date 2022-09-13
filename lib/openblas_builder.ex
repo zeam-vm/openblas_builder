@@ -15,6 +15,13 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Gets the environment variable "OPENBLAS_ARCHIVE_URL".
+  """
+  def openblas_archive_url() do
+    System.get_env("OPENBLAS_ARCHIVE_URL")
+  end
+
+  @doc """
   Gets the path of the archive for building.
   """
   def archive_path_for_build() do
