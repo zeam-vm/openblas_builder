@@ -55,7 +55,8 @@ defmodule OpenBLASBuilder do
     %{
       "ROOT_DIR" => Path.expand("..", __DIR__),
       "BUILD_ARCHIVE" => archive_path_for_build(),
-      "BUILD_ARCHIVE_DIR" => build_archive_dir()
+      "BUILD_ARCHIVE_DIR" => build_archive_dir(),
+      "SRC_PATH" => src_path()
     }
   end
 

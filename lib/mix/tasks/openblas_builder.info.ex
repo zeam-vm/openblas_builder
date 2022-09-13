@@ -18,12 +18,17 @@ defmodule Mix.Tasks.OpenblasBuilder.Info do
     Mix.shell().info(OpenBLASBuilder.build_archive_dir())
   end
 
+  def run(["src_path"]) do
+    Mix.shell().info(OpenBLASBuilder.src_path())
+  end
+
   def run(_args) do
     Mix.shell().error("""
     Usage:
     mix openblas_builder.info archive_filename
     mix openblas_builder.info release_tag\
     mix openblas_builder.info build_archive_dir\
+    mix openblas_builder.info src_path\
     """)
   end
 end
