@@ -7,6 +7,14 @@ defmodule OpenBLASBuilder do
   @version "0.3.21"
 
   @doc """
+  Gets target.
+  """
+  def target() do
+    {cpu, os} = cpu_and_os()
+    "#{cpu}-#{os}"
+  end
+
+  @doc """
   Gets information of CPU and OS.
   """
   def cpu_and_os() do
