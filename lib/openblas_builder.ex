@@ -103,6 +103,29 @@ defmodule OpenBLASBuilder do
     "-I#{include_path()}"
   end
 
+  @doc """
+  Returns the path to the interface of OpenBLAS.
+  """
+  def interface_path() do
+    Path.join(path_extracted_archive(), "interface")
+  end
+
+  @doc """
+  Compiles only files matched by `string_list`
+  and gets the map from each of `string_list` to the corresponding path to the object file.
+  """
+  def compile_matched!(string_list) do
+    maken!()
+    |> filter_matched_and_named_captures(string_list)
+    |> Enum.reduce(%{}, fn x, acc -> Map.merge(acc, x) end)
+    |> Stream.map(fn {key, command} -> {key, {command, Regex.named_captures(~r/-o (?<obj>.+\.o)/, command) |> Map.values() |> hd()}} end)
+    |> Stream.map(fn {key, {command, obj}} -> {key, {command, Path.join(interface_path(), obj)}} end)
+    |> Stream.map(fn {key, {command, obj}} -> {key, {System.shell(command, cd: interface_path()), obj}} end)
+    |> Stream.filter(fn {_key, {{_r, return_code}, _obj}} -> return_code == 0 end)
+    |> Stream.map(fn {key, {_, obj}} -> {key, obj} end)
+    |> Map.new()
+  end
+
   @doc false
   def make_env() do
     %{
