@@ -20,6 +20,22 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
+  Gets the text from `url`.
+  """
+  def get(url) do
+    command =
+      case network_tool() do
+        :curl -> "curl --fail --silent -L #{url}"
+        :wget -> "wget -q -O - #{url}"
+      end
+
+      case System.shell(command) do
+        {body, 0} -> {:ok, body}
+        _ -> :error
+      end
+  end
+
+  @doc """
   Returns `:curl` or `:wget` if found in the PATH.
 
   Return `nil` if not found.
