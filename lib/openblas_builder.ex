@@ -6,6 +6,7 @@ defmodule OpenBLASBuilder do
   @github_repo "xianyi/OpenBLAS"
   @version "0.3.21"
 
+
   @doc """
   Get the cache directory of OpenBLAS.
   """
@@ -15,6 +16,14 @@ defmodule OpenBLASBuilder do
     else
       :filename.basedir(:user_cache, "openblas")
     end
+  end
+
+  @doc """
+  Gets the path of the cache.
+  """
+  def cache_path(parts) do
+    base_dir = openblas_cache_dir()
+    Path.join([base_dir, @version, "cache" | parts])
   end
 
   @doc """
