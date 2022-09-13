@@ -3,6 +3,8 @@ defmodule OpenBLASBuilder do
   Documentation for `OpenBLASBuilder`.
   """
 
+  require Logger
+
   @github_repo "xianyi/OpenBLAS"
   @version "0.3.21"
 
@@ -112,6 +114,19 @@ defmodule OpenBLASBuilder do
   """
   def release_file_url(filename) do
     "https://github.com/#{@github_repo}/releases/download/#(release_tag()}/#{filename}"
+  end
+
+  @doc """
+  Downloads the archive.
+  """
+  def download_archive!(url, archive_path) do
+    File.mkdir_p!(Path.dirname(archive_path))
+
+    if download(url, archive_path) == :error do
+      raise "failed to download the OpenBLAS archive from #{url}"
+    end
+
+    Logger.info("Successfully downloaded the OpenBLAS archive")
   end
 
   @doc """
