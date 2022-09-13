@@ -17,7 +17,9 @@ defmodule OpenBLASBuilder do
     end
   end
 
-  @doc false
+  @doc """
+  Extracts the archive of OpenBLAS.
+  """
   def extract_archive!() do
     unless executable_exists?("tar") do
       raise "tar was not found"
