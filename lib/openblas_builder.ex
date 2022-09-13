@@ -140,7 +140,7 @@ defmodule OpenBLASBuilder do
   Get URL of the release file.
   """
   def release_file_url(filename) do
-    "https://github.com/#{@github_repo}/releases/download/#(release_tag()}/#{filename}"
+    "https://github.com/#{@github_repo}/releases/download/#{release_tag()}/#{filename}"
   end
 
   @doc """
@@ -230,6 +230,7 @@ defmodule OpenBLASBuilder do
     end
   end
 
+  @spec network_tool :: :curl | nil | :wget
   @doc """
   Returns `:curl` or `:wget` if found in the PATH.
 
