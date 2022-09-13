@@ -6,6 +6,16 @@ defmodule OpenBLASBuilder do
   @github_repo "xianyi/OpenBLAS"
   @version "0.3.21"
 
+  @doc """
+  Get the cache directory of OpenBLAS.
+  """
+  def openblas_cache_dir() do
+    if dir = System.get_env("OPENBLAS_CACHE_DIR") do
+      Path.expand(dir)
+    else
+      :filename.basedir(:user_cache, "openblas")
+    end
+  end
 
   @doc """
   Gets the file name of the archive with the target.
