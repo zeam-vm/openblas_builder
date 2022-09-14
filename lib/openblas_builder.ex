@@ -145,11 +145,13 @@ defmodule OpenBLASBuilder do
   and gets the map from each of `string_list` to the corresponding path to the object file.
   """
   def compile_matched!(string_list) do
+    stream = maken!()
+
     subdir =
       File.read!(path_cached_maken_head())
       |> String.split("\n")
 
-    maken!()
+    stream
     |> filter_matched_and_named_captures(string_list)
     |> Enum.reduce(%{}, fn x, acc -> Map.merge(acc, x) end)
     |> Stream.map(fn {key, command} -> {key, {command, Regex.named_captures(~r/-o (?<obj>.+\.o)/, command) |> Map.values() |> hd()}} end)
