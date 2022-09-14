@@ -44,17 +44,24 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
-  Returns the path of the cached results of `make -n` on the `src_path`.
+  Returns the path of the cached results of `make -n | grep -e "A^cc"` on the `src_path`.
   """
   def path_cached_maken() do
     Path.join(src_path(), "cached_maken.txt")
   end
 
   @doc """
+  Returns the path of the cached results of `make -n | head -1` on the `src_path`.
+  """
+  def path_cached_maken_head() do
+    Path.join(src_path(), "cached_maken_head.txt")
+  end
+
+  @doc """
   Returns the result of `make -n` on the `src_path`.
   """
   def maken!() do
-    if File.exists?(path_cached_maken()) do
+    if File.exists?(path_cached_maken()) and File.exists?(path_cached_maken_head()) do
       File.stream!(path_cached_maken())
     else
       unless executable_exists?("make") do
@@ -65,7 +72,17 @@ defmodule OpenBLASBuilder do
 
       result =
         case System.shell(command, cd: path_extracted_archive()) do
-          {result, _} -> result |> String.split("\n") |> Stream.filter(& String.match?(&1, ~r|^cc|))
+          {result, _} ->
+            s = result |> String.split("\n")
+
+            Enum.take(s, 1)
+            |> hd()
+            |> String.split(" ")
+            |> Enum.slice(3..-3)
+            |> Enum.join("\n")
+            |> then(&File.write!(path_cached_maken_head(), &1))
+
+            s |> Stream.filter(& String.match?(&1, ~r|^cc|))
         end
 
       File.write!(path_cached_maken(), Enum.join(result, "\n"))
@@ -106,10 +123,21 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
-  Returns the path to the interface of OpenBLAS.
+  Executes `command` on each `subdir`.
   """
-  def interface_path() do
-    Path.join(path_extracted_archive(), "interface")
+  def cmd(command, subdir) do
+    Stream.unfold(subdir, fn
+      [] -> nil
+
+      [head | tail] ->
+        {_, return_code} = System.shell("#{command} 2>/dev/null", cd: Path.join(path_extracted_archive(), head))
+
+        case return_code do
+          0 -> {head, []}
+          _ -> {nil, tail}
+        end
+    end)
+    |> Enum.reject(&is_nil/1)
   end
 
   @doc """
@@ -117,14 +145,30 @@ defmodule OpenBLASBuilder do
   and gets the map from each of `string_list` to the corresponding path to the object file.
   """
   def compile_matched!(string_list) do
+    subdir =
+      File.read!(path_cached_maken_head())
+      |> String.split("\n")
+
     maken!()
     |> filter_matched_and_named_captures(string_list)
     |> Enum.reduce(%{}, fn x, acc -> Map.merge(acc, x) end)
     |> Stream.map(fn {key, command} -> {key, {command, Regex.named_captures(~r/-o (?<obj>.+\.o)/, command) |> Map.values() |> hd()}} end)
-    |> Stream.map(fn {key, {command, obj}} -> {key, {command, Path.join(interface_path(), obj)}} end)
-    |> Stream.map(fn {key, {command, obj}} -> {key, {System.shell(command, cd: interface_path()), obj}} end)
-    |> Stream.filter(fn {_key, {{_r, return_code}, _obj}} -> return_code == 0 end)
-    |> Stream.map(fn {key, {_, obj}} -> {key, obj} end)
+    |> Stream.map(fn {key, {command, obj}} ->
+      {
+        key,
+        {
+          cmd(command, subdir),
+          obj
+        }
+      }
+    end)
+    |> Stream.map(fn {key, {dir, obj}} ->
+      case dir do
+        [] -> {key, nil}
+        [dir] -> {key, path_extracted_archive() |> Path.join(dir) |> Path.join(obj)}
+      end
+    end)
+    |> Stream.reject(fn {_key, obj} -> is_nil(obj) end)
     |> Map.new()
   end
 
