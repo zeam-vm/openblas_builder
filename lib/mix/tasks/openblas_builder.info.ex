@@ -34,11 +34,11 @@ defmodule Mix.Tasks.OpenblasBuilder.Info do
     Mix.shell().error("""
     Usage:
     mix openblas_builder.info archive_filename
-    mix openblas_builder.info release_tag\
-    mix openblas_builder.info build_archive_dir\
-    mix openblas_builder.info src_path\
-    mix openblas_builder.info include_path\
-    mix openblas_builder.info including_option\
+    mix openblas_builder.info release_tag
+    mix openblas_builder.info build_archive_dir
+    mix openblas_builder.info src_path
+    mix openblas_builder.info include_path
+    mix openblas_builder.info including_option
     """)
   end
 end
