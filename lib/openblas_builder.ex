@@ -123,18 +123,24 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
-  Executes `command` on each `subdir`.
+  Executes `command` on each `subdir` if obj does not exist.
   """
-  def cmd(command, subdir) do
+  def cmd(command, subdir, obj) do
     Stream.unfold(subdir, fn
       [] -> nil
 
       [head | tail] ->
-        {_, return_code} = System.shell("#{command} 2>/dev/null", cd: Path.join(path_extracted_archive(), head))
+        s = Path.join(path_extracted_archive(), head)
+        o = Path.join(s, obj)
+        if File.exists?(o) do
+          {o, []}
+        else
+          {_, return_code} = System.shell("#{command} 2>/dev/null", cd: s)
 
-        case return_code do
-          0 -> {head, []}
-          _ -> {nil, tail}
+          case return_code do
+            0 -> {o, []}
+            _ -> {nil, tail}
+          end
         end
     end)
     |> Enum.reject(&is_nil/1)
@@ -159,16 +165,13 @@ defmodule OpenBLASBuilder do
     |> Flow.map(fn {key, {command, obj}} ->
       {
         key,
-        {
-          cmd(command, subdir),
-          obj
-        }
+        cmd(command, subdir, obj),
       }
     end)
-    |> Flow.map(fn {key, {dir, obj}} ->
+    |> Flow.map(fn {key, dir} ->
       case dir do
         [] -> {key, nil}
-        [dir] -> {key, path_extracted_archive() |> Path.join(dir) |> Path.join(obj)}
+        [dir] -> {key, dir}
       end
     end)
     |> Flow.reject(fn {_key, obj} -> is_nil(obj) end)
