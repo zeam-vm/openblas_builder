@@ -154,8 +154,9 @@ defmodule OpenBLASBuilder do
     stream
     |> filter_matched_and_named_captures(string_list)
     |> Enum.reduce(%{}, fn x, acc -> Map.merge(acc, x) end)
-    |> Stream.map(fn {key, command} -> {key, {command, Regex.named_captures(~r/-o (?<obj>.+\.o)/, command) |> Map.values() |> hd()}} end)
-    |> Stream.map(fn {key, {command, obj}} ->
+    |> Flow.from_enumerable()
+    |> Flow.map(fn {key, command} -> {key, {command, Regex.named_captures(~r/-o (?<obj>.+\.o)/, command) |> Map.values() |> hd()}} end)
+    |> Flow.map(fn {key, {command, obj}} ->
       {
         key,
         {
@@ -164,13 +165,13 @@ defmodule OpenBLASBuilder do
         }
       }
     end)
-    |> Stream.map(fn {key, {dir, obj}} ->
+    |> Flow.map(fn {key, {dir, obj}} ->
       case dir do
         [] -> {key, nil}
         [dir] -> {key, path_extracted_archive() |> Path.join(dir) |> Path.join(obj)}
       end
     end)
-    |> Stream.reject(fn {_key, obj} -> is_nil(obj) end)
+    |> Flow.reject(fn {_key, obj} -> is_nil(obj) end)
     |> Map.new()
   end
 
