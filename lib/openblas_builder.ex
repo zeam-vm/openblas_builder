@@ -125,42 +125,6 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
-  Executes `command` on `subdir` if obj does not exist.
-  """
-  def cmd(command, subdir, obj) do
-    Stream.unfold(subdir, fn
-      [] -> nil
-
-      [head | tail] ->
-        s = Path.join(path_extracted_archive(), head)
-        o = Path.join(s, obj)
-        if File.exists?(o) do
-          {o, []}
-        else
-          make = :crypto.hash(:sha256, command <> head) |> Base.encode16(case: :lower)
-
-          """
-          TOPDIR = .
-          include ./Makefile.system
-
-          all:
-          \tcd ./#{head} && #{command} 2>/dev/null
-          """
-          |> then(&File.write!(Path.join(path_extracted_archive(), make), &1))
-
-          {_, return_code} = System.shell("make -f #{make} 2>/dev/null", cd: path_extracted_archive())
-
-          case return_code do
-            0 -> {o, []}
-            _ -> {nil, tail}
-          end
-        end
-    end)
-    |> Flow.from_enumerable()
-    |> Enum.reject(&is_nil/1)
-  end
-
-  @doc """
   Compiles only files matched by a list of tuples of two strings `{subdir, key}`
   and gets the map from each of a list of strings to the corresponding path to the object file.
   """
