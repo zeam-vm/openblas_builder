@@ -163,6 +163,16 @@ defmodule OpenBLASBuilder do
       Map.values(map_key_to_obj)
       |> Enum.uniq()
 
+    map_key_to_obj =
+      map_key_to_obj
+      |> Enum.map(fn {key, obj} ->
+        {
+          key,
+          Path.join(path_extracted_archive(), obj)
+        }
+      end)
+      |> Map.new()
+
     deps =
       map_key_to_tuple_subdir_command_obj
       |> Enum.map(fn {_key, {subdir, command, obj}} ->
