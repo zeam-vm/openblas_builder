@@ -125,7 +125,7 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
-  Executes `command` on each `subdir` if obj does not exist.
+  Executes `command` on `subdir` if obj does not exist.
   """
   def cmd(command, subdir, obj) do
     Stream.unfold(subdir, fn
@@ -161,35 +161,72 @@ defmodule OpenBLASBuilder do
   end
 
   @doc """
-  Compiles only files matched by `string_list`
-  and gets the map from each of `string_list` to the corresponding path to the object file.
+  Compiles only files matched by a list of tuples of two strings `{subdir, key}`
+  and gets the map from each of a list of strings to the corresponding path to the object file.
   """
-  def compile_matched!(string_list) do
-    stream = maken!()
+  def compile_matched!(list_tuple_two_strings) do
+    {list_subdir, list_key} = Enum.unzip(list_tuple_two_strings)
 
-    subdir =
-      File.read!(path_cached_maken_head())
-      |> String.split("\n")
+    key_to_subdir =
+      Enum.zip(list_key, list_subdir)
+      |> Map.new()
 
-    stream
-    |> filter_matched_and_named_captures(string_list)
-    |> Enum.reduce(%{}, fn x, acc -> Map.merge(acc, x) end)
-    |> Flow.from_enumerable()
-    |> Flow.map(fn {key, command} -> {key, {command, Regex.named_captures(~r/-o (?<obj>.+\.o)/, command) |> Map.values() |> hd()}} end)
-    |> Flow.map(fn {key, {command, obj}} ->
-      {
-        key,
-        cmd(command, subdir, obj),
-      }
+    map_key_to_tuple_subdir_command_obj =
+      maken!()
+      |> filter_matched_and_named_captures(list_key)
+      |> Enum.reduce(%{}, fn x, acc -> Map.merge(acc, x) end)
+      |> Enum.map(fn {key, command} ->
+        subdir = Map.get(key_to_subdir, key)
+        obj = Regex.named_captures(~r/-o (?<obj>.+\.o)/, command) |> Map.values() |> hd()
+
+        {
+          key,
+          {
+            subdir,
+            command,
+            Path.join(subdir, obj)
+          }
+        }
+      end)
+      |> Map.new()
+
+    map_key_to_obj =
+      map_key_to_tuple_subdir_command_obj
+      |> Enum.map(fn {key, {_subdir, _command, obj}} -> {key, obj} end)
+      |> Map.new()
+
+    objs =
+      Map.values(map_key_to_obj)
+      |> Enum.uniq()
+
+    deps =
+      map_key_to_tuple_subdir_command_obj
+      |> Enum.map(fn {_key, {subdir, command, obj}} ->
+        """
+        #{obj}:
+        \tcd ./#{subdir} && #{command} 2>/dev/null
+        """
+      end)
+      |> Enum.join("\n")
+
+    """
+    TOPDIR = .
+    include ./Makefile.system
+
+    all: #{Enum.join(objs, " ")}
+
+    #{deps}
+    """
+    |> then(fn makefile ->
+      make = "Makefile.#{:crypto.hash(:sha256, makefile) |> Base.encode16(case: :lower)}"
+      File.write!(Path.join(path_extracted_archive(), make), makefile)
+      make
     end)
-    |> Flow.map(fn {key, dir} ->
-      case dir do
-        [] -> {key, nil}
-        [dir] -> {key, dir}
-      end
-    end)
-    |> Flow.reject(fn {_key, obj} -> is_nil(obj) end)
-    |> Map.new()
+    |> then(&System.shell("make -f #{&1} 2>/dev/null", cd: path_extracted_archive()))
+    |> case do
+      {_, 0} -> map_key_to_obj
+      _ -> %{}
+    end
   end
 
   @doc false
