@@ -137,7 +137,19 @@ defmodule OpenBLASBuilder do
         if File.exists?(o) do
           {o, []}
         else
-          {_, return_code} = System.shell("#{command} 2>/dev/null", cd: s)
+          make = Path.join(src_path(), :crypto.hash(:sha256, command) |> Base.encode16(case: :lower))
+
+          IO.inspect(make)
+
+          """
+          include #{Path.join(path_extracted_archive(), "Makefile.system")}
+
+          all:
+          \t#{command} 2>/dev/null
+          """
+          |> then(&File.write!(make, &1))
+
+          {_, return_code} = System.shell("make -f #{make} 2>/dev/null", cd: s)
 
           case return_code do
             0 -> {o, []}
