@@ -75,7 +75,9 @@ defmodule OpenBLASBuilder do
           {result, _} ->
             s = result |> String.split("\n")
 
-            Enum.take(s, 1)
+            s
+            |> Stream.filter(&String.match?(&1, ~r/^for d/))
+            |> Enum.take(1)
             |> hd()
             |> String.split(" ")
             |> Enum.slice(3..-3)
