@@ -137,19 +137,18 @@ defmodule OpenBLASBuilder do
         if File.exists?(o) do
           {o, []}
         else
-          make = Path.join(src_path(), :crypto.hash(:sha256, command) |> Base.encode16(case: :lower))
-
-          IO.inspect(make)
+          make = :crypto.hash(:sha256, command <> head) |> Base.encode16(case: :lower)
 
           """
-          include #{Path.join(path_extracted_archive(), "Makefile.system")}
+          TOPDIR = .
+          include ./Makefile.system
 
           all:
-          \t#{command} 2>/dev/null
+          \tcd ./#{head} && #{command} 2>/dev/null
           """
-          |> then(&File.write!(make, &1))
+          |> then(&File.write!(Path.join(path_extracted_archive(), make), &1))
 
-          {_, return_code} = System.shell("make -f #{make} 2>/dev/null", cd: s)
+          {_, return_code} = System.shell("make -f #{make} 2>/dev/null", cd: path_extracted_archive())
 
           case return_code do
             0 -> {o, []}
@@ -157,6 +156,7 @@ defmodule OpenBLASBuilder do
           end
         end
     end)
+    |> Flow.from_enumerable()
     |> Enum.reject(&is_nil/1)
   end
 
