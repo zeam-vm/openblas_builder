@@ -21,19 +21,9 @@ defmodule OpenBLASBuilder do
   Extracts the archive of OpenBLAS.
   """
   def extract_archive!() do
-    unless executable_exists?("tar") do
-      raise "tar was not found"
-    end
-
     src = src_path()
     File.mkdir_p!(src)
-    archive = archive_path!()
-    command = "tar xfz #{archive}"
-
-    case System.shell(command, cd: src) do
-      {_result, 0} -> Path.join(src, archive_basename_with_version())
-      _ -> raise "Fail to tar xfz #{archive}"
-    end
+    :erl_tar.extract(archive_path!(), [{:cwd, src}, :keep_old_files, :compressed])
   end
 
   @doc """
