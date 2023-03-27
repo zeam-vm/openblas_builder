@@ -6,7 +6,7 @@ defmodule OpenBLASBuilder do
   require Logger
 
   @github_repo "xianyi/OpenBLAS"
-  @version "0.3.21"
+  @version "0.3.22"
 
   def archive_path!() do
     cond do
