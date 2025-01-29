@@ -12,7 +12,7 @@ defmodule OpenBLASBuilder do
     cond do
       true ->
         path = archive_path_for_matching_download()
-        unless File.exists?(path), do: download_matching!(path)
+        if !File.exists?(path), do: download_matching!(path)
         path
     end
   end
@@ -54,7 +54,7 @@ defmodule OpenBLASBuilder do
     if File.exists?(path_cached_maken()) and File.exists?(path_cached_maken_head()) do
       File.stream!(path_cached_maken())
     else
-      unless executable_exists?("make") do
+      if !executable_exists?("make") do
         raise "make was not found"
       end
 
@@ -74,7 +74,7 @@ defmodule OpenBLASBuilder do
             |> Enum.join("\n")
             |> then(&File.write!(path_cached_maken_head(), &1))
 
-            s |> Stream.filter(& String.match?(&1, ~r|^cc|))
+            s |> Stream.filter(&String.match?(&1, ~r|^cc|))
         end
 
       File.write!(path_cached_maken(), Enum.join(result, "\n"))
@@ -90,7 +90,7 @@ defmodule OpenBLASBuilder do
   def filter_matched_and_named_captures(stream, string_list) do
     r =
       string_list
-      |> Enum.map(& "(?<#{&1}>^.*#{&1}.*$)")
+      |> Enum.map(&"(?<#{&1}>^.*#{&1}.*$)")
       |> Enum.join("|")
       |> Regex.compile!()
 
@@ -290,7 +290,7 @@ defmodule OpenBLASBuilder do
           raise "could not find #{release_tag()} release under https://github.com/#{@github_repo}/releases"
       end
 
-    unless expected_filename in filenames do
+    if expected_filename not in filenames do
       listing = filenames |> Enum.map(&["    * ", &1, "\n"]) |> IO.iodata_to_binary()
 
       raise "none of the precompiled archives matches your target\n" <>
@@ -333,7 +333,7 @@ defmodule OpenBLASBuilder do
   end
 
   defp assert_network_tool!() do
-    unless network_tool() do
+    if !network_tool() do
       raise "expected either curl or wget to be available in your system, but neither was found"
     end
   end
