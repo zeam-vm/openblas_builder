@@ -70,7 +70,7 @@ defmodule OpenBLASBuilder do
             |> Enum.take(1)
             |> hd()
             |> String.split(" ")
-            |> Enum.slice(3..-3)
+            |> Enum.slice(3..-3//-1)
             |> Enum.join("\n")
             |> then(&File.write!(path_cached_maken_head(), &1))
 
